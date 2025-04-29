@@ -16,11 +16,13 @@ def create_calendar_with_tasks(year, month, tasks):
         date_row = []
         bar_row = []
 
-        for day in week:
+        for i, day in enumerate(week):
             if day == 0:
                 date_row.append(ft.Container(width=50, height=24))
             else:
-                date_row.append(ft.Container(content=ft.Text(str(day)), width=50, height=24))
+                color = "red" if i == 0 else None  # 일요일은 빨강
+                date_row.append(ft.Container(content=ft.Text(str(day), color=color), width=50, height=24))
+
         rows.append(ft.Row(date_row))
 
         # 막대(bar)는 task마다 생성
@@ -43,21 +45,25 @@ def create_calendar_with_tasks(year, month, tasks):
                 span = len(positions)
 
                 bar_row = []
-                for i in range(7):
-                    if i == left_padding:
-                        bar_row.append(
-                            ft.Container(
-                                bgcolor=task['color'],
-                                width=50 * span,
-                                height=6,
-                                border_radius=3
+                i = 0
+                while i < 7:
+                    if i in positions:
+                        if i == positions[0]:  # 바의 시작점
+                            span = positions[-1] - positions[0] + 1
+                            bar_row.append(
+                                ft.Container(
+                                    bgcolor=task['color'],
+                                    width=50 * span,
+                                    height=6,
+                                    border_radius=3
+                                )
                             )
-                        )
-                        i += span - 1  # skip the span
-                    elif i < left_padding or i > positions[-1]:
-                        bar_row.append(ft.Container(width=50, height=6))
+                            i += span  # span만큼 건너뛰기
+                        else:
+                            i += 1  # 이미 처리했거나 중간 부분은 건너뜀
                     else:
-                        continue  # skip cells in the middle of the bar
+                        bar_row.append(ft.Container(width=50, height=6))
+                        i += 1
 
                 rows.append(ft.Row(bar_row))
 
@@ -70,7 +76,7 @@ def main(page: ft.Page):
     # 샘플 작업 데이터
     tasks = [
         {"title": "보고서 작성", "start": "2025-04-10", "end": "2025-04-15", "color": "#42a5f5"},
-        {"title": "디자인 검토", "start": "2025-04-18", "end": "2025-04-21", "color": "#66bb6a"},
+        {"title": "디자인 검토", "start": "2025-04-14", "end": "2025-04-21", "color": "#66bb6a"},
     ]
 
     calendar_ui = create_calendar_with_tasks(2025, 4, tasks)
